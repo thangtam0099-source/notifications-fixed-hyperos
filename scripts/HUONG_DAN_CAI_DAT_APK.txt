@@ -1,0 +1,16 @@
+================================================================================
+  HƯỚNG DẪN XUẤT FILE APK VÀ CÀI ĐẶT TRÊN ĐIỆN THOẠI XIAOMI / HYPEROS
+================================================================================
+
+1. TỰ ĐỘNG BUILD APK QUA GITHUB ACTIONS:
+   - Đẩy dự án lên GitHub.
+   - GitHub Actions chạy .github/workflows/build-apk.yml
+   - Tải file HyperOS-Notification-Fixer-v1.0.apk trong mục Actions -> Artifacts.
+
+2. BUILD BẰNG ANDROID STUDIO:
+   - Mở dự án trong Android Studio -> Build -> Build Bundle(s) / APK(s) -> Build APK(s)
+   - Hoặc gõ lệnh: ./gradlew assembleDebug
+   - File APK tạo tại: app/build/outputs/apk/debug/app-debug.apk
+
+3. CHẠY TRỰC TIẾP KHÔNG CẦN CÀI APK:
+   - Chạy file scripts/hyperos_fix.sh trên điện thoại qua Shizuku (rish) hoặc Termux hoặc cáp ADB!
