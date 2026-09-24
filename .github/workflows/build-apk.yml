@@ -1,15 +1,17 @@
-name: Build Android APK (HyperOS Notification Fixer)
+name: Build Release APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-apk:
-    name: Build Release & Debug APK
+  build-release:
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -19,38 +21,38 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: '17'
-          distribution: 'temurin'
           cache: gradle
 
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
-          accept-android-sdk-licenses: true
 
-      - name: Validate or Restore Gradle Wrapper
+      - name: Install Android SDK
         run: |
-          mkdir -p gradle/wrapper
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ] || [ ! -s gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "gradle-wrapper.jar missing or empty, downloading official Gradle wrapper jar..."
-            curl -sLo gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.11.1/gradle/wrapper/gradle-wrapper.jar
-          fi
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Grant execute permission for gradlew
+      - name: Grant execute permission for Gradle
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace --no-daemon
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace --no-daemon
 
-      - name: Rename APK for Easy Distribution
+      - name: Check APK
         run: |
-          mkdir -p output_apk
-          cp app/build/outputs/apk/debug/app-debug.apk output_apk/HyperOS-Notification-Fixer-v1.0.apk
+          echo "Release APK:"
+          find app/build/outputs/apk/release -type f -name "*.apk" -print
 
-      - name: Upload APK Artifact
+      - name: Rename APK
+        run: |
+          mkdir -p output
+          cp app/build/outputs/apk/release/*.apk \
+            output/HyperOS-Notification-Fixer-v1.0.0-release.apk
+
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: HyperOS-Notification-Fixer-v1.0-APK
-          path: output_apk/*.apk
+          name: HyperOS-Notification-Fixer-v1.0.0-release
+          path: output/HyperOS-Notification-Fixer-v1.0.0-release.apk
           retention-days: 30
